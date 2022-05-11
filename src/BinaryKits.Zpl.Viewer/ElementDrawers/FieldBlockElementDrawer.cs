@@ -140,7 +140,7 @@ namespace BinaryKits.Zpl.Viewer.ElementDrawers
                             this._skCanvas.SetMatrix(matrix);
                         }
 
-                        this._skCanvas.DrawText(textLine, x, y, new SKFont(typeface, fontSize, scaleX, 0), skPaint);
+                        this._skCanvas.DrawText(textLine, x, y, skPaint);
                     }
                 }
             }

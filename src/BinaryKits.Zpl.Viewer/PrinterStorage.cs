@@ -29,7 +29,7 @@ namespace BinaryKits.Zpl.Viewer
         {
             if (!this._cache.ContainsKey(storageDevice))
             {
-                return Array.Empty<byte>();
+                return new byte[0];
             }
 
             if (this._cache.TryGetValue(storageDevice, out var files))
@@ -38,7 +38,7 @@ namespace BinaryKits.Zpl.Viewer
                 return data;
             }
 
-            return Array.Empty<byte>();
+            return new byte[0];
         }
     }
 }

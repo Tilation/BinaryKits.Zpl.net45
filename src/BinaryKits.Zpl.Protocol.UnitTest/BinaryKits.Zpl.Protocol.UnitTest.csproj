@@ -1,9 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net45</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <TargetFrameworks>x86</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,10 +16,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="SkiaSharp" Version="1.68.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BinaryKits.Zpl.Protocol\BinaryKits.Zpl.Protocol.csproj" />
   </ItemGroup>
-
 </Project>

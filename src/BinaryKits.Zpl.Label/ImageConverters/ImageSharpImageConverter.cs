@@ -1,7 +1,5 @@
-﻿using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+﻿using ImageMagick;
 using System.Collections;
-using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -18,7 +16,7 @@ namespace BinaryKits.Zpl.Label.ImageConverters
         {
             var zplBuilder = new StringBuilder();
 
-            using (Image<Rgba32> image = Image.Load(imageData))
+            using (var image = new MagickImage(imageData))
             {
                 var bytesPerRow = image.Width % 8 > 0
                     ? image.Width / 8 + 1
@@ -28,16 +26,14 @@ namespace BinaryKits.Zpl.Label.ImageConverters
 
                 var colorBits = 0;
                 var j = 0;
-
+                var pixels = image.GetPixels();
                 for (var y = 0; y < image.Height; y++)
                 {
-                    var row = image.GetPixelRowSpan(y);
-
                     for (var x = 0; x < image.Width; x++)
                     {
-                        var pixel = row[x];
-
-                        var isBlackPixel = ((pixel.R + pixel.G + pixel.B) / 3) < 128;
+                        var pixel = pixels[x, y];
+                        var pixelColor = pixel.ToColor();
+                        var isBlackPixel = ((pixelColor.R + pixelColor.G + pixelColor.B) / 3) < 128;
                         if (isBlackPixel)
                         {
                             colorBits |= 1 << (7 - j);
@@ -90,27 +86,28 @@ namespace BinaryKits.Zpl.Label.ImageConverters
             var imageHeight = imageData.Length / bytesPerRow;
             var imageWidth = bytesPerRow * 8;
 
-            using (var image = new Image<Rgba32>(imageWidth, imageHeight))
+            using (var image = new MagickImage(MagickColors.White, imageWidth, imageHeight))
             {
+                var pixels = image.GetPixels();
                 for (var y = 0; y < image.Height; y++)
                 {
-                    var row = image.GetPixelRowSpan(y);
                     var bits = new BitArray(imageData.Skip(bytesPerRow * y).Take(bytesPerRow).ToArray());
 
-                    for (var x = 0 ; x < image.Width; x++)
+                    for (var x = 0; x < image.Width; x++)
                     {
+                        var pixel = pixels[x, y];
                         if (bits[x])
                         {
-                            row[x].A = 255;
+                            var col = pixels[x, y].ToColor();
+                            col.A = 255;
+                            pixels.SetPixel(x, y, col.ToByteArray());
                         }
                     }
                 }
 
-                using (var memoryStream = new MemoryStream())
-                {
-                    image.SaveAsPng(memoryStream);
-                    return memoryStream.ToArray();
-                }
+
+                return image.ToByteArray();
+
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using BinaryKits.Zpl.Label;
 using BinaryKits.Zpl.Label.Elements;
+using BinaryKits.Zpl.Viewer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +12,7 @@ namespace BinaryKits.Zpl.Label.UnitTest
     public class DownloadTest
     {
         [TestMethod]
+        [DeploymentItem(@"Magick.Native-Q8-x86.dll")]
         [DeploymentItem(@"ZplData/Zpl.png")]
         [DeploymentItem(@"ZplData/DownloadGraphics.txt")]
         public void DownloadGraphics()
@@ -40,6 +42,8 @@ namespace BinaryKits.Zpl.Label.UnitTest
         }
 
         [TestMethod]
+        [DeploymentItem(@"libSkiasharp.dll")]
+        [DeploymentItem(@"Magick.Native-Q8-x86.dll")]
         [DeploymentItem(@"ZplData/Zpl.png")]
         [DeploymentItem(@"ZplData/DownloadObject.txt")]
         public void DownloadObjects()
@@ -65,6 +69,7 @@ namespace BinaryKits.Zpl.Label.UnitTest
             Assert.IsNotNull(output);
 
             var zplData = File.ReadAllText("DownloadObject.txt");
+
             Assert.AreEqual(zplData, output);
         }
     }

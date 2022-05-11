@@ -122,7 +122,7 @@ namespace BinaryKits.Zpl.Viewer
         {
             if (string.IsNullOrEmpty(zplData))
             {
-                return Array.Empty<string>();
+                return new string[0];
             }
 
             var replacementString = string.Empty;

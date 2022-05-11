@@ -13,6 +13,7 @@ namespace BinaryKits.Zpl.Viewer.UnitTest
     public class DrawerTest
     {
         [TestMethod]
+        [DeploymentItem(@"libSkiaSharp.dll")]
         public void FontAssignment()
         {
             string zplString = @"
@@ -54,6 +55,7 @@ namespace BinaryKits.Zpl.Viewer.UnitTest
         }
 
         [TestMethod]
+        [DeploymentItem(@"libSkiaSharp.dll")]
         public void FormatHandling()
         {
             string zplString = @"

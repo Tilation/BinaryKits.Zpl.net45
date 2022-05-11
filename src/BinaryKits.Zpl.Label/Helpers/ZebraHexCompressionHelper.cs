@@ -94,7 +94,7 @@ namespace BinaryKits.Zpl.Label.Helpers
                     compressedCurrentLine.Append(lastChar);
                 }
 
-                if (compressedCurrentLine.Equals(compressedPreviousLine))
+                if (compressedCurrentLine.ToString().Equals(compressedPreviousLine))
                 {
                     //previous line is repeated
                     compressedLines.Append(':');
@@ -103,7 +103,6 @@ namespace BinaryKits.Zpl.Label.Helpers
                 {
                     compressedLines.Append(compressedCurrentLine);
                 }
-
                 compressedPreviousLine = compressedCurrentLine.ToString();
                 compressedCurrentLine.Clear();
             }

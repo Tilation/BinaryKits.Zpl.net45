@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using static System.FormattableString;
 
 namespace BinaryKits.Zpl.Protocol.Commands
 {
@@ -55,7 +54,7 @@ namespace BinaryKits.Zpl.Protocol.Commands
         ///<inheritdoc/>
         public override string ToZpl()
         {
-            return Invariant($"{this.CommandPrefix}{this.ModuleWidth},{this.WideBarToNarrowBarWidthRatio:0.0},{this.BarCodeHeight}");
+            return $"{this.CommandPrefix}{this.ModuleWidth},{this.WideBarToNarrowBarWidthRatio.ToString("N1", CultureInfo.InvariantCulture)},{this.BarCodeHeight}";
         }
 
         ///<inheritdoc/>

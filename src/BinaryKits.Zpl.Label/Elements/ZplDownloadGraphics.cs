@@ -1,8 +1,6 @@
 ﻿using BinaryKits.Zpl.Label.Helpers;
 using BinaryKits.Zpl.Label.ImageConverters;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.Processing;
+using ImageMagick;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -71,21 +69,15 @@ namespace BinaryKits.Zpl.Label.Elements
         public override IEnumerable<string> Render(ZplRenderOptions context)
         {
             byte[] objectData;
-            using (var image = Image.Load(ImageData))
+            using (var image = new MagickImage(ImageData))
             {
                 if (context.ScaleFactor != 1)
                 {
                     var scaleWidth = (int)Math.Round(image.Width * context.ScaleFactor);
                     var scaleHeight = (int)Math.Round(image.Height * context.ScaleFactor);
-
-                    image.Mutate(x => x.Resize(image.Width / 2, image.Height / 2));
+                    image.Resize(scaleWidth, scaleHeight);
                 }
-
-                using (var ms = new MemoryStream())
-                {
-                    image.Save(ms, new PngEncoder());
-                    objectData = ms.ToArray();
-                }
+                objectData = image.ToByteArray();
             }
 
             var imageResult = _imageConverter.ConvertImage(objectData);
