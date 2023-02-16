@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace BinaryKits.Zpl.Label.Elements
 {
@@ -56,8 +56,7 @@ namespace BinaryKits.Zpl.Label.Elements
             //^BCN,100,Y,N,N
             //^FD123456 ^ FS
             var result = new List<string>();
-            result.AddRange(RenderPosition(context));
-            result.Add(RenderModuleWidth());
+            result.AddRange(FieldOrigin.Render(context));
             result.Add($"^B3{RenderFieldOrientation()},{(Mod43CheckDigit ? "Y" : "N")},{context.Scale(Height)},{RenderPrintInterpretationLine()},{RenderPrintInterpretationLineAboveCode()}");
             result.Add($"^FD{Content}^FS");
 

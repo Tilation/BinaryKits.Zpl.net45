@@ -1,4 +1,4 @@
-using BinaryKits.Zpl.Label;
+﻿using BinaryKits.Zpl.Label;
 using BinaryKits.Zpl.Label.Elements;
 
 namespace BinaryKits.Zpl.Viewer.CommandAnalyzers
@@ -24,36 +24,34 @@ namespace BinaryKits.Zpl.Viewer.CommandAnalyzers
         protected string[] SplitCommand(string zplCommand, int dataStartIndex = 0)
         {
             var zplCommandData = zplCommand.Substring(this.PrinterCommandPrefix.Length + dataStartIndex);
-            return zplCommandData.TrimStart().Split(',');
+            return zplCommandData.Split(',');
         }
 
         protected FieldOrientation ConvertFieldOrientation(string fieldOrientation)
         {
-            return fieldOrientation switch
+            switch (fieldOrientation)
             {
-                "N" => FieldOrientation.Normal,
-                "R" => FieldOrientation.Rotated90,
-                "I" => FieldOrientation.Rotated180,
-                "B" => FieldOrientation.Rotated270,
-                 _  => FieldOrientation.Normal,
-            };
+                case "N":
+                    return FieldOrientation.Normal;
+                case "R":
+                    return FieldOrientation.Rotated90;
+                case "I":
+                    return FieldOrientation.Rotated180;
+                case "B":
+                    return FieldOrientation.Rotated270;
+            }
+
+            return FieldOrientation.Normal;
         }
 
-        protected ErrorCorrectionLevel ConvertErrorCorrectionLevel(string errorCorrection)
+        protected bool ConvertBoolean(string yesOrNo)
         {
-            return errorCorrection switch
+            if (yesOrNo == "Y")
             {
-                "H" => ErrorCorrectionLevel.UltraHighReliability,
-                "Q" => ErrorCorrectionLevel.HighReliability,
-                "M" => ErrorCorrectionLevel.Standard,
-                "L" => ErrorCorrectionLevel.HighDensity,
-                 _  => ErrorCorrectionLevel.Standard,
-            };
-        }
+                return true;
+            }
 
-        protected bool ConvertBoolean(string yesOrNo, string defaultValue = "N")
-        {
-            return (!string.IsNullOrEmpty(yesOrNo) ? yesOrNo : defaultValue) == "Y";
+            return false;
         }
 
         protected int IndexOfNthCharacter(string input, int occurranceToFind, char charToFind)

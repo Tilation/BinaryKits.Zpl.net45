@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace BinaryKits.Zpl.Label.Elements
@@ -59,8 +59,7 @@ namespace BinaryKits.Zpl.Label.Elements
         public override IEnumerable<string> Render(ZplRenderOptions context)
         {
             var result = new List<string>();
-            result.AddRange(RenderPosition(context));
-            result.Add(RenderModuleWidth());
+            result.AddRange(FieldOrigin.Render(context));
             result.Add($"^B2{RenderFieldOrientation()},{context.Scale(Height)},{RenderPrintInterpretationLine()},{RenderPrintInterpretationLineAboveCode()},{(Mod10CheckDigit ? "Y" : "N")}");
             result.Add($"^FD{Content}^FS");
 

@@ -1,11 +1,8 @@
-using BinaryKits.Zpl.Label;
+﻿using BinaryKits.Zpl.Label;
 using BinaryKits.Zpl.Label.Elements;
 using BinaryKits.Zpl.Viewer.Helpers;
 using SkiaSharp;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace BinaryKits.Zpl.Viewer.ElementDrawers
 {
@@ -30,141 +27,123 @@ namespace BinaryKits.Zpl.Viewer.ElementDrawers
         ///<inheritdoc/>
         public override void Draw(ZplElementBase element)
         {
-            Draw(element, new DrawerOptions());
-        }
-
-        ///<inheritdoc/>
-        public override void Draw(ZplElementBase element, DrawerOptions options)
-        {
             if (element is ZplFieldBlock fieldBlock)
             {
+                float x = fieldBlock.PositionX;
+                float y = fieldBlock.PositionY;
+
                 var font = fieldBlock.Font;
 
                 float fontSize = font.FontHeight > 0 ? font.FontHeight : font.FontWidth;
-                var scaleX = 1.00f;
+                var scaleX = 1.0f;
                 if (font.FontWidth != 0 && font.FontWidth != fontSize)
                 {
-                    scaleX *= (float)font.FontWidth / fontSize;
+                    scaleX = (float)font.FontWidth / fontSize;
                 }
 
-                var typeface = options.FontLoader(font.FontName);
-                var text = fieldBlock.Text;
-                if (fieldBlock.UseHexadecimalIndicator)
+                fontSize *= 0.95f;
+
+                var typeface = SKTypeface.Default;
+                if (font.FontName == "0")
                 {
-                    text = text.ReplaceHexEscapes();
+                    //typeface = SKTypeface.FromFile(@"swiss-721-black-bt.ttf");
+                    typeface = SKTypeface.FromFamilyName("Arial", SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright);
                 }
 
-                if (options.ReplaceDashWithEnDash)
+                var textLines = fieldBlock.Text.ReplaceSpecialChars().Split(new[] { "\\&" }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (var textLine in textLines)
                 {
-                    text = text.Replace("-", " \u2013 ");
-                }
+                    using var skPaint = new SKPaint();
+                    skPaint.Color = SKColors.Black;
+                    skPaint.Typeface = typeface;
+                    skPaint.TextSize = fontSize;
+                    skPaint.TextScaleX = scaleX;
 
-                var skFont = new SKFont(typeface, fontSize, scaleX);
-                using var skPaint = new SKPaint(skFont);
-                var textBoundBaseline = new SKRect();
-                skPaint.MeasureText("X", ref textBoundBaseline);
+                    var textBounds = new SKRect();
+                    var textBoundBaseline = new SKRect();
+                    skPaint.MeasureText(new string('A', fieldBlock.Text.Length), ref textBoundBaseline);
+                    skPaint.MeasureText(textLine, ref textBounds);
 
-                float x = fieldBlock.PositionX;
-                float y = fieldBlock.PositionY + textBoundBaseline.Height;
-
-                var textLines = WordWrap(text, skFont, fieldBlock.Width);
-                var hangingIndent = 0;
-                var lineHeight = fontSize + fieldBlock.LineSpace;
-
-                // actual ZPL printer does not include trailing line spacing in total height
-                var totalHeight = lineHeight * fieldBlock.MaxLineCount - fieldBlock.LineSpace;
-                // labelary
-                //var totalHeight = lineHeight * fieldBlock.MaxLineCount;
-
-                if (fieldBlock.FieldTypeset != null)
-                {
-                    totalHeight = lineHeight * (fieldBlock.MaxLineCount-1) + textBoundBaseline.Height;
-                    y -= totalHeight;
-                }
-
-                using (new SKAutoCanvasRestore(this._skCanvas))
-                {
-                    SKMatrix matrix = SKMatrix.Empty;
-
-                    if (fieldBlock.FieldOrigin != null)
+                    switch (fieldBlock.TextJustification)
                     {
-                        switch (fieldBlock.Font.FieldOrientation)
+                        case TextJustification.Center:
+                            var diff = fieldBlock.Width - textBounds.Width;
+                            x += diff / 2;
+                            break;
+                        case TextJustification.Right:
+                            diff = fieldBlock.Width - textBounds.Width;
+                            x += diff;
+                            break;
+                        case TextJustification.Left:
+                        case TextJustification.Justified:
+                        default:
+                            break;
+                    }
+
+                    if (fieldBlock.FieldTypeset != null)
+                    {
+                        y -= textBounds.Height;
+                    }
+
+                    using (new SKAutoCanvasRestore(this._skCanvas))
+                    {
+                        SKMatrix matrix = SKMatrix.Empty;
+
+                        if (fieldBlock.FieldOrigin != null)
                         {
-                            case FieldOrientation.Rotated90:
-                                matrix = SKMatrix.CreateRotationDegrees(90, fieldBlock.PositionX + totalHeight / 2, fieldBlock.PositionY + totalHeight / 2);
-                                break;
-                            case FieldOrientation.Rotated180:
-                                matrix = SKMatrix.CreateRotationDegrees(180, fieldBlock.PositionX + fieldBlock.Width / 2, fieldBlock.PositionY + totalHeight / 2);
-                                break;
-                            case FieldOrientation.Rotated270:
-                                matrix = SKMatrix.CreateRotationDegrees(270, fieldBlock.PositionX + fieldBlock.Width / 2, fieldBlock.PositionY + fieldBlock.Width / 2);
-                                break;
-                            case FieldOrientation.Normal:
-                                break;
+                            switch (fieldBlock.Font.FieldOrientation)
+                            {
+                                case FieldOrientation.Rotated90:
+                                    matrix = SKMatrix.CreateRotationDegrees(90, x, y);
+                                    y -= font.FontHeight - textBoundBaseline.Height;
+                                    break;
+                                case FieldOrientation.Rotated180:
+                                    matrix = SKMatrix.CreateRotationDegrees(180, x, y);
+                                    x -= textBounds.Width;
+                                    y -= font.FontHeight - textBoundBaseline.Height;
+                                    break;
+                                case FieldOrientation.Rotated270:
+                                    matrix = SKMatrix.CreateRotationDegrees(270, x, y);
+                                    x -= textBounds.Width;
+                                    y += textBoundBaseline.Height;
+                                    break;
+                                case FieldOrientation.Normal:
+                                    y += textBoundBaseline.Height;
+                                    break;
+                            }
                         }
-                    }
-                    else
-                    {
-                        switch (fieldBlock.Font.FieldOrientation)
+                        else
                         {
-                            case FieldOrientation.Rotated90:
-                                matrix = SKMatrix.CreateRotationDegrees(90, fieldBlock.PositionX, fieldBlock.PositionY);
-                                break;
-                            case FieldOrientation.Rotated180:
-                                matrix = SKMatrix.CreateRotationDegrees(180, fieldBlock.PositionX, fieldBlock.PositionY);
-                                break;
-                            case FieldOrientation.Rotated270:
-                                matrix = SKMatrix.CreateRotationDegrees(270, fieldBlock.PositionX, fieldBlock.PositionY);
-                                break;
-                            case FieldOrientation.Normal:
-                                break;
-                        }
-                    }
-
-                    if (matrix != SKMatrix.Empty)
-                    {
-                        this._skCanvas.SetMatrix(matrix);
-                    }
-
-                    foreach (var textLine in textLines)
-                    {
-                        x = fieldBlock.PositionX + hangingIndent;
-
-                        var textBounds = new SKRect();
-                        skPaint.MeasureText(textLine, ref textBounds);
-                        var diff = fieldBlock.Width - textBounds.Width;
-
-                        switch (fieldBlock.TextJustification)
-                        {
-                            case TextJustification.Center:
-                                x += diff / 2 - textBounds.Left;
-                                break;
-                            case TextJustification.Right:
-                                x += diff - textBounds.Left * 2;
-                                hangingIndent = -fieldBlock.HangingIndent;
-                                break;
-                            case TextJustification.Left:
-                            case TextJustification.Justified:
-                            default:
-                                hangingIndent = fieldBlock.HangingIndent;
-                                break;
+                            switch (fieldBlock.Font.FieldOrientation)
+                            {
+                                case FieldOrientation.Rotated90:
+                                    matrix = SKMatrix.CreateRotationDegrees(90, x, y);
+                                    x += textBoundBaseline.Height;
+                                    break;
+                                case FieldOrientation.Rotated180:
+                                    matrix = SKMatrix.CreateRotationDegrees(180, x, y);
+                                    y -= textBoundBaseline.Height;
+                                    break;
+                                case FieldOrientation.Rotated270:
+                                    matrix = SKMatrix.CreateRotationDegrees(270, x, y);
+                                    x -= textBoundBaseline.Height;
+                                    break;
+                                case FieldOrientation.Normal:
+                                    y += textBoundBaseline.Height;
+                                    break;
+                            }
                         }
 
-                        this._skCanvas.DrawText(textLine, x, y, skFont, skPaint);
-                        y += lineHeight;
-                    }
-                }
-            }
-        }
+                        if (matrix != SKMatrix.Empty)
+                        {
+                            this._skCanvas.SetMatrix(matrix);
+                        }
 
                         this._skCanvas.DrawText(textLine, x, y, skPaint);
                     }
                 }
             }
-
-            lines.Add(line.ToString().Trim());
-            return lines;
         }
-
     }
 }

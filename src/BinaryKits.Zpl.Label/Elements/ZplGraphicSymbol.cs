@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace BinaryKits.Zpl.Label.Elements
 {
@@ -52,7 +52,7 @@ namespace BinaryKits.Zpl.Label.Elements
         {
             //^GSo,h,w
             var result = new List<string>();
-            result.AddRange(RenderPosition(context));
+            result.AddRange(FieldOrigin.Render(context));
             result.Add($"^GS{RenderFieldOrientation(FieldOrientation)},{context.Scale(Height)},{context.Scale(Width)}^FD{CharacterLetter}^FS");
 
             return result;

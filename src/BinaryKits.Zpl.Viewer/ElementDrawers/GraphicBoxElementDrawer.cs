@@ -69,7 +69,7 @@ namespace BinaryKits.Zpl.Viewer.ElementDrawers
 
                 if (graphicBox.LineColor == Label.LineColor.White)
                 {
-                    skPaint.Color = SKColors.Transparent;
+                    skPaint.Color = SKColors.White;
                 }
 
                 var cornerRadius = (graphicBox.CornerRounding / 8.0f) * (Math.Min(width1, height1) / 2.0f);

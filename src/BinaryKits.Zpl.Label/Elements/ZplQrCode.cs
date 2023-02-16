@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace BinaryKits.Zpl.Label.Elements
 {
@@ -11,10 +11,7 @@ namespace BinaryKits.Zpl.Label.Elements
         public int MagnificationFactor { get; private set; }
 
         public ErrorCorrectionLevel ErrorCorrectionLevel { get; private set; }
-
         public int MaskValue { get; private set; }
-
-        public FieldOrientation FieldOrientation { get; protected set; }
 
         /// <summary>
         /// Zpl QrCode
@@ -26,8 +23,6 @@ namespace BinaryKits.Zpl.Label.Elements
         /// <param name="magnificationFactor">Size of the QR code, 1 on 150 dpi printers, 2 on 200 dpi printers, 3 on 300 dpi printers, 6 on 600 dpi printers</param>
         /// <param name="errorCorrectionLevel"></param>
         /// <param name="maskValue">0-7, (default: 7)</param>
-        ///  <param name="fieldOrientation"></param>
-        /// <param name="bottomToTop"></param>
         public ZplQrCode(
             string content,
             int positionX,
@@ -35,22 +30,14 @@ namespace BinaryKits.Zpl.Label.Elements
             int model = 2,
             int magnificationFactor = 2,
             ErrorCorrectionLevel errorCorrectionLevel = ErrorCorrectionLevel.HighReliability,
-            int maskValue = 7,
-            FieldOrientation fieldOrientation = FieldOrientation.Normal,
-            bool bottomToTop = false)
-            : base(positionX, positionY, bottomToTop)
+            int maskValue = 7)
+            : base(positionX, positionY)
         {
             Content = content;
             Model = model;
             MagnificationFactor = magnificationFactor;
             ErrorCorrectionLevel = errorCorrectionLevel;
             MaskValue = maskValue;
-            FieldOrientation = fieldOrientation;
-        }
-
-        protected string RenderFieldOrientation()
-        {
-            return RenderFieldOrientation(FieldOrientation);
         }
 
         ///<inheritdoc/>
@@ -60,8 +47,8 @@ namespace BinaryKits.Zpl.Label.Elements
             //^ BQN,2,10
             //^ FDMM,AAC - 42 ^ FS
             var result = new List<string>();
-            result.AddRange(RenderPosition(context));
-            result.Add($"^BQ{RenderFieldOrientation()},{Model},{context.Scale(MagnificationFactor)},{RenderErrorCorrectionLevel(ErrorCorrectionLevel)},{MaskValue}");
+            result.AddRange(FieldOrigin.Render(context));
+            result.Add($"^BQN,{Model},{context.Scale(MagnificationFactor)},{RenderErrorCorrectionLevel(ErrorCorrectionLevel)},{MaskValue}");
             result.Add($"^FD{RenderErrorCorrectionLevel(ErrorCorrectionLevel)}A,{Content}^FS");
 
             return result;

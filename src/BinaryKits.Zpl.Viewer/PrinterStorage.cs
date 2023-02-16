@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 
 namespace BinaryKits.Zpl.Viewer
@@ -35,7 +35,7 @@ namespace BinaryKits.Zpl.Viewer
             if (this._cache.TryGetValue(storageDevice, out var files))
             {
                 files.TryGetValue(fileName, out var data);
-                return data ?? Array.Empty<byte>();
+                return data;
             }
 
             return new byte[0];

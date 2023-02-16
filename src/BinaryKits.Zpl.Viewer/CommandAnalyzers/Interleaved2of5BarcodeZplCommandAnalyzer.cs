@@ -1,4 +1,4 @@
-using BinaryKits.Zpl.Label.Elements;
+﻿using BinaryKits.Zpl.Label.Elements;
 using BinaryKits.Zpl.Viewer.Models;
 
 namespace BinaryKits.Zpl.Viewer.CommandAnalyzers
@@ -20,14 +20,11 @@ namespace BinaryKits.Zpl.Viewer.CommandAnalyzers
 
             if (zplDataParts.Length > 1)
             {
-                if (!string.IsNullOrEmpty(zplDataParts[1]))
-                {
-                    _ = int.TryParse(zplDataParts[1], out height);
-                }
+                _ = int.TryParse(zplDataParts[1], out height);
             }
             if (zplDataParts.Length > 2)
             {
-                printInterpretationLine = this.ConvertBoolean(zplDataParts[2], "Y");
+                printInterpretationLine = !this.ConvertBoolean(zplDataParts[2]);
             }
             if (zplDataParts.Length > 3)
             {

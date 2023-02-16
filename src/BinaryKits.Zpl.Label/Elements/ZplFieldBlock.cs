@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace BinaryKits.Zpl.Label.Elements
@@ -29,9 +29,8 @@ namespace BinaryKits.Zpl.Label.Elements
             int hangingIndent = 0,
             NewLineConversionMethod newLineConversion = NewLineConversionMethod.ToZplNewLine,
             bool useHexadecimalIndicator = true,
-            bool reversePrint = false,
-            bool bottomToTop = false)
-            : base(text, positionX, positionY, font, newLineConversion, useHexadecimalIndicator, reversePrint, bottomToTop)
+            bool reversePrint = false)
+            : base(text, positionX, positionY, font, newLineConversion, useHexadecimalIndicator, reversePrint)
         {
             TextJustification = textJustification;
             Width = width;
@@ -69,7 +68,7 @@ namespace BinaryKits.Zpl.Label.Elements
             // ^ XZ
             var result = new List<string>();
             result.AddRange(Font.Render(context));
-            result.AddRange(RenderPosition(context));
+            result.AddRange(FieldOrigin.Render(context));
             result.Add($"^FB{context.Scale(Width)},{MaxLineCount},{context.Scale(LineSpace)},{RenderTextJustification()},{context.Scale(HangingIndent)}");
             result.Add(RenderFieldDataSection());
 
