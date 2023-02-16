@@ -1,4 +1,4 @@
-﻿using BinaryKits.Zpl.Label.Elements;
+using BinaryKits.Zpl.Label.Elements;
 using BinaryKits.Zpl.Viewer.ElementDrawers;
 using SkiaSharp;
 using System;
@@ -24,6 +24,7 @@ namespace BinaryKits.Zpl.Viewer
             {
                 new Barcode128ElementDrawer(),
                 new Barcode39ElementDrawer(),
+                new BarcodeEAN13ElementDrawer(),
                 new DataMatrixElementDrawer(),
                 new FieldBlockElementDrawer(),
                 new GraphicBoxElementDrawer(),
@@ -44,12 +45,11 @@ namespace BinaryKits.Zpl.Viewer
         /// <param name="labelWidth">Label width in millimeter</param>
         /// <param name="labelHeight">Label height in millimeter</param>
         /// <param name="printDensityDpmm">Dots per millimeter</param>
-        /// <param name="context"></param>
         /// <returns></returns>
         public byte[] Draw(
             ZplElementBase[] elements,
-            double labelWidth = 102,
-            double labelHeight = 152,
+            double labelWidth = 101.6,
+            double labelHeight = 152.4,
             int printDensityDpmm = 8)
         {
             var labelImageWidth = Convert.ToInt32(labelWidth * printDensityDpmm);
@@ -57,7 +57,7 @@ namespace BinaryKits.Zpl.Viewer
 
             using var skBitmap = new SKBitmap(labelImageWidth, labelImageHeight);
             using var skCanvas = new SKCanvas(skBitmap);
-            skCanvas.Clear(SKColors.White);
+            skCanvas.Clear(SKColors.Transparent);
 
             foreach (var element in elements)
             {
@@ -91,16 +91,16 @@ namespace BinaryKits.Zpl.Viewer
                 {
                     if (element is ZplBarcode)
                     {
-                        throw new Exception($"Error on zpl element \"{(element as ZplBarcode).Content}\": {ex.Message}");
+                        throw new Exception($"Error on zpl element \"{(element as ZplBarcode).Content}\": {ex.Message}", ex);
                     }
                     else
                     {
-                        throw ex;
+                        throw;
                     }
                 }
             }
 
-            using var data = skBitmap.Encode(SKEncodedImageFormat.Png, 80);
+            using var data = skBitmap.Encode(_drawerOptions.RenderFormat, _drawerOptions.RenderQuality);
             return data.ToArray();
         }
 
@@ -114,18 +114,22 @@ namespace BinaryKits.Zpl.Viewer
             for (int i = 0; i < total; i++)
             {
                 // RGBA8888
-                int alphaByte = (i << 2) + 3;
-                if (invertBytes[alphaByte] == 0)
+                int rLoc = (i << 2);
+                int gLoc = (i << 2) + 1;
+                int bLoc = (i << 2) + 2;
+                int aLoc = (i << 2) + 3;
+                if (invertBytes[aLoc] == 0)
                 {
                     continue;
                 }
 
                 // Set color
-                var targetColor = SKColors.White;
-                if (originalBytes[alphaByte - 1] == 255)
-                {
-                    targetColor = SKColors.Black;
-                }
+                byte rByte = (byte)(originalBytes[rLoc] ^ invertBytes[rLoc]);
+                byte gByte = (byte)(originalBytes[gLoc] ^ invertBytes[gLoc]);
+                byte bByte = (byte)(originalBytes[bLoc] ^ invertBytes[bLoc]);
+                byte aByte = (byte)(originalBytes[aLoc] ^ invertBytes[aLoc]);
+
+                var targetColor = new SKColor(rByte, gByte, bByte, aByte);
 
                 int x, y;
                 y = Math.DivRem(i, skBitmapInvert.Width, out x);

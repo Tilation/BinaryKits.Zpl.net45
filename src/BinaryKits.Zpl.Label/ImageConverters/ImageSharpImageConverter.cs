@@ -1,4 +1,4 @@
-﻿using ImageMagick;
+using ImageMagick;
 using System.Collections;
 using System.Linq;
 using System.Text;

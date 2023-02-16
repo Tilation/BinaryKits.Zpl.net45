@@ -3,9 +3,9 @@ using BinaryKits.Zpl.Viewer.Models;
 
 namespace BinaryKits.Zpl.Viewer.CommandAnalyzers
 {
-    public class Interleaved2of5BarcodeZplCommandAnalyzer : ZplCommandAnalyzerBase
+    public class CodeEAN13BarcodeZplCommandAnalyzer : ZplCommandAnalyzerBase
     {
-        public Interleaved2of5BarcodeZplCommandAnalyzer(VirtualPrinter virtualPrinter) : base("^B2", virtualPrinter)
+        public CodeEAN13BarcodeZplCommandAnalyzer(VirtualPrinter virtualPrinter) : base("^BE", virtualPrinter)
         { }
 
         public override ZplElementBase Analyze(string zplCommand)
@@ -16,7 +16,6 @@ namespace BinaryKits.Zpl.Viewer.CommandAnalyzers
             var height = this.VirtualPrinter.BarcodeInfo.Height;
             var printInterpretationLine = true;
             var printInterpretationLineAboveCode = false;
-            var calculateAndPrintMod10CheckDigit = false;
 
             if (zplDataParts.Length > 1)
             {
@@ -33,19 +32,15 @@ namespace BinaryKits.Zpl.Viewer.CommandAnalyzers
             {
                 printInterpretationLineAboveCode = this.ConvertBoolean(zplDataParts[3]);
             }
-            if (zplDataParts.Length > 4)
-            {
-                calculateAndPrintMod10CheckDigit = this.ConvertBoolean(zplDataParts[4]);
-            }
+          
 
             //The field data are processing in the FieldDataZplCommandAnalyzer
-            this.VirtualPrinter.SetNextElementFieldData(new Interleaved2of5BarcodeFieldData
+            this.VirtualPrinter.SetNextElementFieldData(new CodeEAN13BarcodeFieldData
             {
                 FieldOrientation = fieldOrientation,
                 Height = height,
                 PrintInterpretationLine = printInterpretationLine,
-                PrintInterpretationLineAboveCode = printInterpretationLineAboveCode,
-                CalculateAndPrintMod10CheckDigit = calculateAndPrintMod10CheckDigit
+                PrintInterpretationLineAboveCode = printInterpretationLineAboveCode
             });
 
             return null;

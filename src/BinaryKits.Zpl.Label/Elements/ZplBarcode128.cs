@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace BinaryKits.Zpl.Label.Elements
 {
@@ -7,6 +7,9 @@ namespace BinaryKits.Zpl.Label.Elements
     /// </summary>
     public class ZplBarcode128 : ZplBarcode
     {
+
+        public string Mode { get; set; }
+
         /// <summary>
         /// Code 128 Barcode
         /// </summary>
@@ -20,6 +23,7 @@ namespace BinaryKits.Zpl.Label.Elements
         /// <param name="printInterpretationLine"></param>
         /// <param name="printInterpretationLineAboveCode"></param>
         /// <param name="bottomToTop"></param>
+        /// <param name="mode"></param>
         public ZplBarcode128(
             string content,
             int positionX,
@@ -30,7 +34,8 @@ namespace BinaryKits.Zpl.Label.Elements
             FieldOrientation fieldOrientation = FieldOrientation.Normal,
             bool printInterpretationLine = true,
             bool printInterpretationLineAboveCode = false,
-            bool bottomToTop = false)
+            bool bottomToTop = false,
+            string mode = "N")
             : base(content,
                   positionX,
                   positionY,
@@ -42,6 +47,7 @@ namespace BinaryKits.Zpl.Label.Elements
                   printInterpretationLineAboveCode,
                   bottomToTop)
         {
+            this.Mode = mode;
         }
 
         ///<inheritdoc/>
@@ -53,7 +59,8 @@ namespace BinaryKits.Zpl.Label.Elements
             //^BCN,100,Y,N,N
             //^FD123456 ^ FS
             var result = new List<string>();
-            result.AddRange(FieldOrigin.Render(context));
+            result.AddRange(RenderPosition(context));
+            result.Add(RenderModuleWidth());
             result.Add($"^BC{RenderFieldOrientation()},{context.Scale(Height)},{RenderPrintInterpretationLine()},{RenderPrintInterpretationLineAboveCode()}");
             result.Add($"^FD{Content}^FS");
 

@@ -1,9 +1,9 @@
-﻿using BarcodeLib;
 using BinaryKits.Zpl.Label.Elements;
 using SkiaSharp;
-using System.Drawing;
+using System.Collections.Generic;
 using ZXing;
 using ZXing.Datamatrix;
+using ZXing.Datamatrix.Encoder;
 
 namespace BinaryKits.Zpl.Viewer.ElementDrawers
 {
@@ -23,30 +23,16 @@ namespace BinaryKits.Zpl.Viewer.ElementDrawers
                 float x = dataMatrix.PositionX;
                 float y = dataMatrix.PositionY;
 
-                if (dataMatrix.FieldTypeset != null)
-                {
-                    y -= dataMatrix.Height;
-                }
-
                 var writer = new DataMatrixWriter();
-                var result = writer.encode(dataMatrix.Content, BarcodeFormat.DATA_MATRIX, 0, 0);
+                var hints = new Dictionary<EncodeHintType, object> {
+                    { EncodeHintType.DATA_MATRIX_SHAPE, SymbolShapeHint.FORCE_SQUARE }
+                };
+                var result = writer.encode(dataMatrix.Content, BarcodeFormat.DATA_MATRIX, 0, 0, hints);
 
-                int size = dataMatrix.Height;
-                using var image = new SKBitmap(result.Width + size - 1, result.Height + size - 1);
-
-                for (int row = 0; row < result.Height; row++)
-                {
-                    for (int col = 0; col < result.Width; col++)
-                    {
-                        var color = result[row, col] ? SKColors.Black : SKColors.White;
-                        image.SetPixel(row, col, color);
-                    }
-                }
-
-                using var resizedImage = image.Resize(new SKSizeI(image.Width * size, image.Height * size), SKFilterQuality.None);
+                using var resizedImage = this.BitMatrixToSKBitmap(result, dataMatrix.Height);
 
                 var png = resizedImage.Encode(SKEncodedImageFormat.Png, 100).ToArray();
-                this.DrawBarcode(png, dataMatrix.Height, dataMatrix.Height, dataMatrix.FieldOrigin != null, x, y, dataMatrix.FieldOrientation);
+                this.DrawBarcode(png, resizedImage.Height, resizedImage.Width, dataMatrix.FieldOrigin != null, x, y, 0, dataMatrix.FieldOrientation);
             }
         }
     }
